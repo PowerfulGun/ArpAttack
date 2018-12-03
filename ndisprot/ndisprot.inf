@@ -1,0 +1,86 @@
+;
+; ndisprot.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=ndisprot.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+ndisprot_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+ndisprot.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%ndisprot.DeviceDesc%=ndisprot_Device, Root\ndisprot ; TODO: edit hw-id
+
+[ndisprot_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+ndisprot.sys
+
+;-------------- Service installation
+[ndisprot_Device.NT.Services]
+AddService = ndisprot,%SPSVCINST_ASSOCSERVICE%, ndisprot_Service_Inst
+
+; -------------- ndisprot driver install sections
+[ndisprot_Service_Inst]
+DisplayName    = %ndisprot.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\ndisprot.sys
+
+;
+;--- ndisprot_Device Coinstaller installation ------
+;
+
+[ndisprot_Device.NT.CoInstallers]
+AddReg=ndisprot_Device_CoInstaller_AddReg
+CopyFiles=ndisprot_Device_CoInstaller_CopyFiles
+
+[ndisprot_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[ndisprot_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[ndisprot_Device.NT.Wdf]
+KmdfService =  ndisprot, ndisprot_wdfsect
+[ndisprot_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "ndisprot Installation Disk"
+ndisprot.DeviceDesc = "ndisprot Device"
+ndisprot.SVCDESC = "ndisprot Service"
